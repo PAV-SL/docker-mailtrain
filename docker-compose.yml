@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  mysql:
+    image: mariadb:10.4
+    environment:
+    - MYSQL_ROOT_PASSWORD=mailtrain
+    - MYSQL_DATABASE=mailtrain
+    - MYSQL_USER=mailtrain
+    - MYSQL_PASSWORD=mailtrain
+    volumes:
+    - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:5
+    volumes:
+    - redis-data:/data
+
+  mongo:
+    image: mongo:4-xenial
+    volumes:
+    - mongo-data:/data/db
+
+  mailtrain:
+    image: mailtrain/mailtrain:latest
+    ports:
+    - "3000:3000"
+    - "3003:3003"
+    - "3004:3004"
+    volumes:
+    - mailtrain-data:/app/server/files
+    environment:
+    - URL_BASE_TRUSTED=http://localhost/mailtrain/
+    #- WWW_HOST=mailtrain
+    - WWW_PROXY=true
+  nginx:
+    image: nginx
+    ports:
+    - "80:80"
+    volumes: 
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+      - ./logs/:/var/log/nginx/
+  grafana:
+    image: grafana/grafana:5.1.0
+    ports:
+      - 3001:3000
+
+volumes:
+  nginx-data:
+  mysql-data:
+  redis-data:
+  mongo-data:
+  mailtrain-data:
+
+networks: 
+  mailtrain_net:
